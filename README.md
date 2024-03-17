@@ -8,3 +8,6 @@
 go get -u github.com/soonio/sqlr
 ```
 
+## Usage
+
+  - Create

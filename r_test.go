@@ -1,40 +1,87 @@
 package sqlr
 
 import (
-	"fmt"
 	"testing"
 )
 
-type Demo struct {
-	Avatar string `db:"avatar"`
-	Cover  string `db:"cover"`
-}
-
-func TestNew(t *testing.T) {
-	var SQL = "(`username`,`gender`,`created`,`update`,`password`,`avatar`,`cover`) VALUES (?,?,?,?,?,?,?)"
-	var Vals = []any{"张三", 1, 86400, "123456", "https://www.demo.com/avatar.png", "https://www.demo.com/cover.png"}
+func TestR_Insert(t *testing.T) {
+	var SQL = "(`username`,`gender`,`password`,`avatar`,`cover`,`created`,`update`) VALUES (?,?,?,?,?,?,?)"
+	var Vals = []any{"张三", 1, "123456", "https://www.demo.com/avatar.png", "https://www.demo.com/cover.png", 86400, 86400}
 
 	var r = new(R).
-		Append("username", "张三").
-		Append("gender", 1).
-		AppendV(86400).
-		AppendK("created", "update").
+		Pair("username", "张三").
+		Pair("gender", 1).
 		Map(map[string]any{"password": "123456"}).
-		Struct(Demo{
+		Struct(struct {
+			Avatar string `db:"avatar"`
+			Cover  string `db:"cover"`
+		}{
 			Avatar: "https://www.demo.com/avatar.png",
 			Cover:  "https://www.demo.com/cover.png",
-		}, "db")
+		}, "db").
+		ShareV(86400, "created", "update")
 
 	var partSQL = r.Insert()
 	if SQL != partSQL {
-		t.Fail()
+		t.Error("SQL拼接错误")
 	}
 
 	var values = r.V()
 	for i := 0; i < len(Vals); i++ {
 		if Vals[i] != values[i] {
-			t.Fail()
+			t.Error("参数结果列表错误")
 		}
 	}
-	fmt.Println(t.Name())
+}
+
+func TestR_Update(t *testing.T) {
+	var SQL = "`username` = ?,`gender` = ?,`password` = ?,`avatar` = ?,`cover` = ?,`update` = ?"
+	var Vals = []any{"张三", 1, "123456", "https://www.demo.com/avatar.png", "https://www.demo.com/cover.png", 86400}
+
+	var r = new(R).
+		Pair("username", "张三").
+		Pair("gender", 1).
+		Map(map[string]any{"password": "123456"}).
+		Struct(struct {
+			Avatar string `db:"avatar"`
+			Cover  string `db:"cover"`
+		}{
+			Avatar: "https://www.demo.com/avatar.png",
+			Cover:  "https://www.demo.com/cover.png",
+		}, "db").
+		Pair("update", 86400)
+
+	var partSQL = r.Update()
+	if SQL != partSQL {
+		t.Error("SQL拼接错误", partSQL)
+	}
+
+	var values = r.V()
+	for i := 0; i < len(Vals); i++ {
+		if Vals[i] != values[i] {
+			t.Error("参数结果列表错误")
+		}
+	}
+}
+
+func TestR_Where(t *testing.T) {
+	var SQL = "username = ? AND gender = ? AND update > ?"
+	var Vals = []any{"张三", 1, 86400}
+
+	var r = new(R).
+		Pair("username = ?", "张三").
+		Pair("gender = ?", 1).
+		Pair("update > ?", 86400)
+
+	var partSQL = r.Where()
+	if SQL != partSQL {
+		t.Error("SQL拼接错误", partSQL)
+	}
+
+	var values = r.V()
+	for i := 0; i < len(Vals); i++ {
+		if Vals[i] != values[i] {
+			t.Error("参数结果列表错误")
+		}
+	}
 }

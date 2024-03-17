@@ -9,6 +9,12 @@ type Sorter struct {
 	allow []string    // 允许的排序列表
 }
 
+// Allow 允许的排序字段
+func (s *Sorter) Allow(filed ...string) *Sorter {
+	s.allow = append(s.allow, filed...)
+	return s
+}
+
 // When 当条件成立是参与排序
 func (s *Sorter) When(do bool, key, sort string) *Sorter {
 	if do {
@@ -30,12 +36,6 @@ func (s *Sorter) Add(key, sort string) *Sorter {
 		s.data = append(s.data, [2]string{key, sort})
 	}
 
-	return s
-}
-
-// Allow 允许的排序字段
-func (s *Sorter) Allow(filed ...string) *Sorter {
-	s.allow = append(s.allow, filed...)
 	return s
 }
 

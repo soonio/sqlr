@@ -22,15 +22,14 @@ func (w *Scope) Pointer(sql string, value any) *Scope {
 // When do条件成立时，sql条件生效
 func (w *Scope) When(do bool, sql string, value ...any) *Scope {
 	if do {
-		w.AppendK(sql).AppendV(value...)
-		//return w.Raw(sql, value...)
+		w.ShareK(sql, value...)
 	}
 	return w
 }
 
 // Raw 直接拼接原生sql部分
-func (w *Scope) Raw(sql string, params ...any) *Scope {
-	w.AppendK(sql).AppendV(params...)
+func (w *Scope) Raw(sql string, value ...any) *Scope {
+	w.ShareK(sql, value...)
 	return w
 }
 
@@ -40,7 +39,8 @@ func (w *Scope) In(field string, item ...any) *Scope {
 	if l == 0 {
 		return w
 	}
-	w.AppendK(In(field, l)).AppendV(item...)
+	w.ShareK(In(field, l), item...)
+
 	return w
 }
 

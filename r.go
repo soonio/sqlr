@@ -22,22 +22,26 @@ func (r *R) Clone() *R {
 	return &R{k: k, v: v}
 }
 
-// Append 添加 k 和 v 如 k="name = ?" v="mysql"
-func (r *R) Append(k string, v any) *R {
+// Pair 添加 k和v一对数据 如 k="name = ?" v="john"
+func (r *R) Pair(k string, v any) *R {
 	r.k = append(r.k, k)
 	r.v = append(r.v, v)
 	return r
 }
 
-// AppendK 添加多个key
-func (r *R) AppendK(k ...string) *R {
-	r.k = append(r.k, k...)
+// ShareK 添加多个key
+func (r *R) ShareK(k string, v ...any) *R {
+	r.k = append(r.k, k)
+	r.v = append(r.v, v...)
 	return r
 }
 
-// AppendV 添加多个value
-func (r *R) AppendV(v ...any) *R {
-	r.v = append(r.v, v...)
+// ShareV 添加多个value
+func (r *R) ShareV(v any, k ...string) *R {
+	r.k = append(r.k, k...)
+	for i := 0; i < len(k); i++ {
+		r.v = append(r.v, v)
+	}
 	return r
 }
 
